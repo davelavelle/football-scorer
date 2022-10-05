@@ -7,8 +7,8 @@ export default function ScoreCard({ team, score, scorers, assists }: ScoreCardPr
     const scorerList = () => {
         const x = scorers.map(scorer => { 
             const assister : Event | undefined = assists?.find(x=>x.time === scorer.time);
-            if(assister) return `${scorer.player} (${scorer.time} - ${assister.player})`;
-            return `${scorer.player} (${scorer.time})`;
+            if(assister) return `${scorer.player} (${Math.ceil(scorer.time)} - ${assister.player})`;
+            return `${scorer.player} (${Math.ceil(scorer.time)})`;
         });
         return x;
     }

@@ -1,70 +1,81 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
-import { Match } from './types/match';
-import ScoreCard from './components/scoreCard'
-import Event from './types/event'
+import Match from './types/match';
+import AddMatchCard from './components/addMatch'
+import MatchCard from './components/matchCard'
+import MatchListItem from './types/matchListItem';
 
 function App() {
 
-  const [timeGone, setTimeGone] = useState<string>('')
+  const [matches, setMatches] = useState<MatchListItem[]>([]);
+  const [pageState, setPageState] = useState<'LISTMATCHES' | 'ADDMATCH' | 'VIEWMATCH'>('LISTMATCHES');
 
-  const scorers: Event[] = [{
-    player: 'Sam',
-    time: 23
-  }]
 
-  const assists: Event[] = [{
-    player: 'Evan',
-    time: 23
-  }]
+  const [squad, setSquad] = useState<string[]>([]);
 
-  const match: Match = {
-    kickOffTime: new Date(2022, 9, 3, 15, 15, 0),
-    halfTime: new Date(2022, 9, 3, 15, 46, 12),
-    kickOffTime2ndHalf: new Date(2022, 9, 3, 15, 55, 12),
-    fullTime: new Date(2022, 9, 3, 16, 12, 12),
-    halfLength: 30,
-    opponent: 'Droylsden',
+  const [match, setMatch] = useState<Match>({
+    id: -1,
+    halfLength: 1,
+    opponent: '',
+    matchDate: new Date(),
     location: 'HOME',
-    wcfcScore: 5,
-    opponentScore: 2,
-    wcfcScorers: scorers,
-    wcfcAssists: assists,
-    opponentScorers: []
+    wcfcScore: 0,
+    opponentScore: 0,
+    wcfcScorers: [],
+    wcfcAssists: [],
+    opponentScorers: [],
+    squad: squad
+  });
+
+  const showMatch = (id: number) => {
+    var getMatch = localStorage.getItem(`match${id}`);
+    if (getMatch) {
+      const newMatch = JSON.parse(getMatch) as Match;
+      setMatch(newMatch);
+      setPageState('VIEWMATCH');
+    }
   }
 
-  function calculateTimeGone(kickOffTime: Date, halfOffset: number) {
-    const now: Date = new Date();
-    const diffTime: number = (now.getTime() - kickOffTime.getTime()) / 60000;
-    const minutes = parseInt(diffTime.toString());
-    const seconds = parseInt(((diffTime - minutes) * 60).toString());
-    const leadingZero = seconds < 10 ? '0' : '';
-    return `${minutes + halfOffset}:${leadingZero}${seconds}`;
-
+  const showAddMatch = () => {
+    setPageState('ADDMATCH');
   }
 
-  const updateTimeGone = useCallback(
-    () => {
+  const cancelAddMatch = () => {
+    setPageState('LISTMATCHES');
+  }
 
-      if (match.halfTime && !match.kickOffTime2ndHalf) {
-        return setTimeGone('H-T');
-      }
-      if (match.fullTime) {
-        return setTimeGone('F-T');
-      }
+  const nextId = () => {
+    return matches.length++;
+  }
 
-      if (match.kickOffTime2ndHalf)
-        return setTimeGone(calculateTimeGone(match.kickOffTime2ndHalf, match.halfLength));
-
-      if (match.kickOffTime)
-        return setTimeGone(calculateTimeGone(match.kickOffTime, 0));
-
-      return setTimeGone('');
-    }, [match.kickOffTime, match.halfTime, match.fullTime, match.kickOffTime2ndHalf, match.halfLength]);
+  const saveMatchToList = (id: number, name: string) => {
+    const getMatches = localStorage.getItem('matches');
+    let currentMatches: MatchListItem[] = [];
+    if (getMatches) {
+      currentMatches = JSON.parse(getMatches)
+    }
+    const newMatch: MatchListItem = {
+      id: id,
+      name: name
+    };
+    currentMatches.push(newMatch);
+    localStorage.setItem('matches', JSON.stringify(currentMatches));
+    setMatches(currentMatches);
+  }
 
   useEffect(() => {
-    setTimeout(updateTimeGone, 1000);
-  }, [updateTimeGone])
+    const getMatches = localStorage.getItem('matches');
+    if (getMatches) {
+      return setMatches(JSON.parse(getMatches));
+    }
+  }, [setMatches]);
+
+  useEffect(() => {
+    const getSquad = localStorage.getItem('squad');
+    if (getSquad) {
+      return setSquad(JSON.parse(getSquad));
+    }
+  }, [setSquad]);
 
   return (
     <div className="App">
@@ -74,15 +85,31 @@ function App() {
             <h1><i className=''></i>WCFC Greens Match Scorers</h1>
           </div>
         </div>
-        <div className="row">
-          <div className='text-center fs-2'>
-            {timeGone}
+        {pageState === 'LISTMATCHES' &&
+          <div className='d-grid gap-2'>
+            {matches.map(matchItem => {
+              return (
+                <button className='btn btn-primary' onClick={() => showMatch(matchItem.id)} >{matchItem.name}</button>
+              );
+            })}
+            <button className='btn btn-warning' onClick={() => showAddMatch()}>ADD MATCH</button>
+
           </div>
-          <ScoreCard team='WCFC Greens' score={match.wcfcScore} scorers={match.wcfcScorers} assists={match.wcfcAssists} />
-          <ScoreCard team={match.opponent} score={match.opponentScore} scorers={match.opponentScorers} />
-        </div>
+        }
+        {pageState === 'ADDMATCH' &&
+          <AddMatchCard cancel={cancelAddMatch} id={nextId()} saveToList={saveMatchToList} />
+        }
+        {pageState === 'VIEWMATCH' &&
+          <MatchCard match={match} setMatch={setMatch} squad={squad} />
+        }
+        {pageState !== 'LISTMATCHES' &&
+          <div className='d-grid mt-5 gy-2'>
+
+            <button className='btn btn-warning' onClick={() => setPageState('LISTMATCHES')} >HOME</button>
+          </div>
+        }
       </div>
-    </div>
+    </div >
   );
 }
 
