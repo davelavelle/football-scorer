@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-
+//["Alfie","Amr","Evan","Lewis","Sam","Corey","Jake","Fin","Kyran","Cameron","Cole","Robbie","Jayden","Mason","Jason"]
 export default function SquadCard({ squad, setSquad }: SquadCardProps) {
     const [newPlayer, setNewPlayer] = useState<string>('');
 
     const deletePlayer = (index: number) => {
-        let savedPlayers = localStorage.getItem('squad') ?? '';
+        let savedPlayers = localStorage.getItem('squad') ?? '[]';
         const savedPlayersArray = JSON.parse(savedPlayers);
         savedPlayersArray.splice(index, 1);
         localStorage.setItem('squad', JSON.stringify(savedPlayersArray));
@@ -13,10 +13,10 @@ export default function SquadCard({ squad, setSquad }: SquadCardProps) {
 
     const addPlayer = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newPlayer || newPlayer.length === 0) {
+        if (!newPlayer || newPlayer.length === 0 || squad.indexOf(newPlayer) > 0) {
             return;
         }
-        let savedPlayersString = localStorage.getItem('squad') ?? '';
+        let savedPlayersString = localStorage.getItem('squad') ?? '[]';
         const savedPlayers = JSON.parse(savedPlayersString);
         savedPlayers.push(newPlayer);
         localStorage.setItem('squad', JSON.stringify(savedPlayers));
