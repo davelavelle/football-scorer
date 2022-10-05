@@ -89,7 +89,7 @@ function App() {
           <div className='d-grid gap-2'>
             {matches.map(matchItem => {
               return (
-                <button className='btn btn-primary' onClick={() => showMatch(matchItem.id)} >{matchItem.name}</button>
+                <button key={matchItem.id} className='btn btn-primary' onClick={() => showMatch(matchItem.id)} >{matchItem.name}</button>
               );
             })}
             <button className='btn btn-warning' onClick={() => showAddMatch()}>ADD MATCH</button>
