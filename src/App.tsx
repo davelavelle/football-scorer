@@ -4,11 +4,12 @@ import Match from './types/match';
 import AddMatchCard from './components/addMatch'
 import MatchCard from './components/matchCard'
 import MatchListItem from './types/matchListItem';
+import SquadCard from './components/squadCard';
 
 function App() {
 
   const [matches, setMatches] = useState<MatchListItem[]>([]);
-  const [pageState, setPageState] = useState<'LISTMATCHES' | 'ADDMATCH' | 'VIEWMATCH'>('LISTMATCHES');
+  const [pageState, setPageState] = useState<'LISTMATCHES' | 'ADDMATCH' | 'VIEWMATCH' | 'VIEWSQUAD'>('LISTMATCHES');
 
 
   const [squad, setSquad] = useState<string[]>([]);
@@ -34,10 +35,6 @@ function App() {
       setMatch(newMatch);
       setPageState('VIEWMATCH');
     }
-  }
-
-  const showAddMatch = () => {
-    setPageState('ADDMATCH');
   }
 
   const cancelAddMatch = () => {
@@ -92,7 +89,8 @@ function App() {
                 <button key={matchItem.id} className='btn btn-primary' onClick={() => showMatch(matchItem.id)} >{matchItem.name}</button>
               );
             })}
-            <button className='btn btn-warning' onClick={() => showAddMatch()}>ADD MATCH</button>
+            <button className='btn btn-warning' onClick={() => setPageState('ADDMATCH')}>ADD MATCH</button>
+            <button className='btn btn-success' onClick={() => setPageState('VIEWSQUAD')}>EDIT SQUAD</button>
 
           </div>
         }
@@ -101,6 +99,9 @@ function App() {
         }
         {pageState === 'VIEWMATCH' &&
           <MatchCard match={match} setMatch={setMatch} squad={squad} />
+        }
+        {pageState === 'VIEWSQUAD' &&
+          <SquadCard squad={squad} setSquad={setSquad} />
         }
         {pageState !== 'LISTMATCHES' &&
           <div className='d-grid mt-5 gy-2'>
